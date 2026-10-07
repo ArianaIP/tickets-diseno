@@ -135,9 +135,9 @@ legend{font-weight:600;font-size:14px;margin-bottom:6px}
     <p class="sub">Cuéntame qué necesitas. Cada pedido entra a una cola ordenada por prioridad y fecha de entrega.</p>
 
     <form id="f" novalidate>
-      <label>Tu nombre<input id="nombre" required placeholder="Ej. Lucía Pérez"></label>
+      <label>Tu nombre<select id="nombre" required><option value="">Selecciona…</option><option>Aixa Aldana Enriquez Silva</option><option>Andres Castillo Santa Cruz</option><option>Antonio Jesús Villar Olguin</option><option>Ariana Lizet Huaranca Nuñez</option><option>Brenda Yuma Sanchez Sante</option><option>Carlos Daniel del Castillo Vergara</option><option>Cesar Romano Alfaro Carmona</option><option>Dalia Nicol de la Cruz Vega</option><option>Darwin Manuel Hoyos Ayala</option><option>Diego Gaddiel Enriquez Silva</option><option>Flor Elizabeth Mendez Castro</option><option>Gustavo Alonso Inga Molina</option><option>Gustavo Antonio Aspajo Rengifo</option><option>Hilary Salazar Villegas</option><option>José Junior Salazar Ayala</option><option>Juan Mauricio Ruiz Huayta</option><option>Kassandra Francis Lopez Wong</option><option>Lender Osmey Sayago Patiño</option><option>Luis Enrique Cabanillas Vargas</option><option>Manuel Jimenez Eguia</option><option>Mario Mendez Castro</option><option>Oscar Arturo Montes Benites</option><option>Paola del Carmen Quevedo Esteban</option><option>Pierina Cefaratti Prieto</option><option>Sofia Solange Salcedo Yovera</option><option>Susana Raquel Mora Pariona</option><option>Tirza Isabella Ruiz Baca</option><option value="Otro">Otro</option></select></label>
       <label>Tu área<select id="area" required>
-        <option value="">Selecciona…</option><option>Comercial</option><option>Marketing</option><option>Recursos Humanos</option><option>Finanzas</option><option>Operaciones</option><option>Gerencia</option><option>Otra</option>
+        <option value="">Selecciona…</option><option>Postventa</option><option>Ventas</option><option>Legal</option><option>Bienestar</option><option>Finanzas</option><option>Marketing</option>
       </select></label>
       <label class="full">Nombre del proyecto<input id="titulo" required placeholder="Ej. Post de LinkedIn para webinar de noviembre"></label>
       <label>Tipo de pieza<select id="tipo" required>
@@ -146,6 +146,7 @@ legend{font-weight:600;font-size:14px;margin-bottom:6px}
       <label>Formato<select id="formato" required>
         <option value="">Selecciona…</option><option>Vertical (post de feed)</option><option>Historia o reel (vertical completo)</option><option>Cuadrado</option><option>Horizontal (banner, web, video)</option><option>Presentación (pantalla)</option><option>Hoja A4 / impreso</option><option>No estoy seguro</option>
       </select></label>
+      <label class="full" id="nombre-otro-wrap" hidden>Escribe tu nombre<input id="nombreOtro" placeholder="Nombre y apellido"></label>
       <label class="full" id="otro-wrap" hidden>¿Qué tipo de pieza es?<input id="tipoOtro" placeholder="Ej. Firma de correo, invitación, gigantografía…"></label>
       <label class="full">Detalla el proyecto<textarea id="desc" required placeholder="Cuéntanos de qué se trata, el objetivo y el mensaje principal."></textarea></label>
       <label class="full">¿A quién va dirigido?<input id="destino" required placeholder="Ej. un cliente, el área comercial, seguidores de LinkedIn"></label>
@@ -249,6 +250,7 @@ function render(){
   }
 }
 $("filtro").onchange=render;
+$("nombre").onchange=()=>{$("nombre-otro-wrap").hidden=$("nombre").value!=="Otro";};
 $("tipo").onchange=()=>{$("otro-wrap").hidden=$("tipo").value!=="Otro";};
 
 let fotos=[];
@@ -267,7 +269,8 @@ $("f").addEventListener("submit",async e=>{
   e.preventDefault();
   const v=id=>$(id).value.trim();
   const tipo=v("tipo")==="Otro"?v("tipoOtro"):v("tipo");
-  const data={nombre:v("nombre"),area:v("area"),titulo:v("titulo"),tipo,formato:v("formato"),descripcion:v("desc"),destino:v("destino"),
+  const nombre=v("nombre")==="Otro"?v("nombreOtro"):v("nombre");
+  const data={nombre,area:v("area"),titulo:v("titulo"),tipo,formato:v("formato"),descripcion:v("desc"),destino:v("destino"),
     copy:v("copy"),refs:v("refs"),fecha:v("fecha"),prioridad:document.querySelector('input[name="prio"]:checked').value,estado:"Pendiente"};if(!data.refs)data.refs=null;
   const msg=$("msg");msg.className="msg";
   if(!data.nombre||!data.area||!data.titulo||!data.tipo||!data.formato||!data.descripcion||!data.destino||!data.copy||!data.fecha){msg.className="msg err";msg.textContent="Completa todos los campos. Solo las referencias son opcionales.";return;}
@@ -282,7 +285,7 @@ $("f").addEventListener("submit",async e=>{
       data.fotos.push(SB.storage.from("fotos").getPublicUrl(path).data.publicUrl);}
     const {error}=await SB.from("tickets").insert(data);if(error)throw error;
     fotos=[];drawThumbs();
-    $("f").reset();$("otro-wrap").hidden=true;msg.className="msg ok";msg.textContent="Solicitud enviada. Ya está en la cola de Ariana.";if(window.paperPlane)window.paperPlane();
+    $("f").reset();$("otro-wrap").hidden=true;$("nombre-otro-wrap").hidden=true;msg.className="msg ok";msg.textContent="Solicitud enviada. Ya está en la cola de Ariana.";if(window.paperPlane)window.paperPlane();
   }catch(err){msg.className="msg err";msg.textContent="No se pudo enviar. Revisa tu conexión e inténtalo otra vez.";console.error(err);}
   $("send").disabled=false;
 });
